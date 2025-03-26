@@ -8,6 +8,36 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 const BcHome = ({ height, width }) => {
+  const fetchUserId = () => {
+    // Retrieve the data from localStorage
+    const userData = localStorage.getItem("userData");
+  
+    // Check if userData exists
+    if (userData) {
+      try {
+        // Parse the stored JSON string
+        const parsedData = JSON.parse(userData);
+  
+        // Return the userid if it exists
+        return parsedData.userid || null;
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        return null;
+      }
+    } else {
+      console.warn("No user data found in localStorage.");
+      return null;
+    }
+  };
+  
+  // Fetch and log the user ID
+  const userid = fetchUserId();
+  if (userid) {
+    console.log(`Fetched User ID: ${userid}`);
+  } else {
+    console.error("User ID not found.");
+  }
+  
   const navigate = useNavigate();
 
   // Handler for navigating to the "Today" page

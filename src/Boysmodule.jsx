@@ -7,6 +7,7 @@ import ServicePage from './Pages/ServicePage';
 import PaymentPage from './Pages/PaymentPage';
 
 const Boysmodule = ({ height, width }) => {
+    
     return (
         <>
             {/* Appbar and Bottom Navigation */}

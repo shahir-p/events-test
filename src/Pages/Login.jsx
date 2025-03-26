@@ -1,18 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Button from 'react-bootstrap/Button';
+import React, { useState, useEffect } from "react";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import Button from "react-bootstrap/Button";
 import logo from "../assets/cabbon-logo.png";
-import { useNavigate } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import ResetOptionsModal from './ResetOptionsModal';
+import ResetOptionsModal from "./ResetOptionsModal";
 
 const Login = ({ height, width }) => {
-  const [category, setCategory] = useState('');
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
+  const [category, setCategory] = useState("");
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
@@ -24,92 +34,128 @@ const Login = ({ height, width }) => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
+  
     if (!category) {
-      showError('Please select a category.');
+      showError("Please select a category.");
       return;
     }
-
+  
     try {
       const email = `${userId}`;
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-      if (category === 'manager') {
-        storeUserData(userCredential.user, category);
-        redirectToPage(category);
-        return;
-      }
-
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-      if (userDoc.exists() && userDoc.data().category === category) {
-        storeUserData(userCredential.user, category);
-        redirectToPage(category);
+  
+      let userid = null; // Declare userid in the outer scope to be reused
+  
+      // Query Firestore for staff with matching grade and email
+      const staffQuery = query(
+        collection(db, "staff"),
+        where("grade", "==", category),
+        where("email", "==", userCredential.user.email)
+      );
+  
+      const querySnapshot = await getDocs(staffQuery);
+  
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          userid = data.userid || data.userID; // Use correct field name (handle both `userid` and `userID`)
+        });
+  
+        if (userid) {
+          console.log(`Fetched User ID: ${userid}`);
+          storeUserData(userCredential.user, category, userid); // Store userid in local storage
+          redirectToPage(category); // Pass userid to redirectToPage
+        } else {
+          console.error("No userid found in the fetched documents.");
+        }
       } else {
-        showError("Invalid category for the given User ID.");
+        showError("No matching staff found for the given category.");
       }
     } catch (error) {
+      console.error("Login error:", error);
       showError("Login failed. Please check your credentials.");
     }
   };
+  
 
   const handleGoogleAuth = async () => {
     if (!category) {
       showError("Please select a category before signing in with Google.");
       return;
     }
-
+  
     try {
+      // Sign in with Google
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
-      if (category === 'manager') {
-        storeUserData(user, category);
-        redirectToPage(category);
-        return;
+  
+      let userid = null; // Declare userid in the outer scope
+  
+      // Query Firestore for staff with matching grade and email
+      const staffQuery = query(
+        collection(db, "staff"),
+        where("grade", "==", category),
+        where("email", "==", user.email)
+      );
+  
+      const querySnapshot = await getDocs(staffQuery);
+  
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          userid = data.userid || data.userID; // Handle both `userid` and `userID` keys
+        });
       }
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists() && userDoc.data().category === category) {
-        storeUserData(user, category);
-        redirectToPage(category);
+  
+      if (userid) {
+        console.log(`Fetched User ID: ${userid}`);
+        storeUserData(user, category, userid); // Store user data in localStorage
+        redirectToPage(category, userid); // Redirect with the correct userid
       } else {
-        showError("Invalid category for the Google account.");
+        showError("No matching staff found for the given category.");
       }
     } catch (error) {
-      showError(error.message || "Google Sign-In failed.");
+      console.error("Google Sign-In error:", error);
+      showError("Google Sign-In failed. Please try again.");
     }
   };
-
-  const storeUserData = (user, category) => {
+  
+  const storeUserData = (user, category, userid) => {
     const userData = {
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName || '',
+      displayName: user.displayName || "",
       category,
+      userid: userid
     };
-    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem("userData", JSON.stringify(userData),);
   };
 
   const redirectToPage = (category) => {
-    if (category === 'boyscaptain') navigate('/boyscaptain', { replace: true });
-    else if (['agrade', 'bgrade', 'general'].includes(category)) navigate('/boys', { replace: true });
-    else if (['captain', 'vicecaptain'].includes(category)) navigate('/captain', { replace: true });
-    else if (category === 'manager') navigate('/manager', { replace: true });
+    if (category === "boyscaptain") navigate("/boyscaptain", { replace: true });
+    else if (["agrade", "bgrade", "general"].includes(category))
+      navigate("/boys", { replace: true });
+    else if (["captain", "vicecaptain"].includes(category))
+      navigate("/captain", { replace: true });
+    else if (category === "manager") navigate("/manager", { replace: true });
     else showError("Invalid category selected.");
   };
 
   const showError = (message) => {
     const errorElement = document.getElementById("error");
     errorElement.textContent = message;
-    setTimeout(() => { errorElement.textContent = ""; }, 2000);
+    setTimeout(() => {
+      errorElement.textContent = "";
+    }, 2000);
   };
+
   useEffect(() => {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem("userData");
     if (userData) {
       const { category } = JSON.parse(userData);
-      redirectToPage(category); // Replace with your existing redirect function
+      redirectToPage(category); // Redirect if user is already logged in
     } else {
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
@@ -137,7 +183,9 @@ const Login = ({ height, width }) => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            <option hidden value="">Select Category</option>
+            <option hidden value="">
+              Select Category
+            </option>
             <option value="manager">Manager</option>
             <option value="captain">Captain</option>
             <option value="vicecaptain">Vice Captain</option>
@@ -165,8 +213,13 @@ const Login = ({ height, width }) => {
               disabled={!category}
             />
           </InputGroup>
-          <div className='w-100 '>
-            <span style={{ color: "red", fontSize: "12px", float: "right" }} onClick={handleShow}>Reset</span>
+          <div className="w-100 ">
+            <span
+              style={{ color: "red", fontSize: "12px", float: "right" }}
+              onClick={handleShow}
+            >
+              Reset
+            </span>
           </div>
           <span>OR</span>
           <InputGroup className="mb-2 mt-2" style={{ width: `${width * 0.7}px` }}>

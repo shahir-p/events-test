@@ -6,6 +6,36 @@ import { Link } from "react-router-dom";
 
 
 const CreateEvent = ({ height, width }) => {
+  const fetchUserId = () => {
+    // Retrieve the data from localStorage
+    const userData = localStorage.getItem("userData");
+  
+    // Check if userData exists
+    if (userData) {
+      try {
+        // Parse the stored JSON string
+        const parsedData = JSON.parse(userData);
+  
+        // Return the userid if it exists
+        return parsedData.userid || null;
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        return null;
+      }
+    } else {
+      console.warn("No user data found in localStorage.");
+      return null;
+    }
+  };
+  
+  // Fetch and log the user ID
+  const userid = fetchUserId();
+  if (userid) {
+    console.log(`Fetched User ID: ${userid}`);
+  } else {
+    console.error("User ID not found.");
+  }
+  
   const [show, setShow] = useState(false);
 
   const handleShow = () => setShow(true)
@@ -17,10 +47,11 @@ const CreateEvent = ({ height, width }) => {
     <>
 
       <div className='home d-flex flex-column ' style={{ width: `${width}px`, height: `${height}px`, paddingLeft: "10px", paddingRight: "10px" }}>
-        <div style={{ marginTop: `${height * 0.1 + 15}px`, }}>
+      <div style={{ marginTop: `${height * 0.1 + 15}px`, }}>
+                    {/* <img src={profile} alt="" width={"50px"} height={"0px"} /> */}
+                    <span style={{ paddingLeft: "10px", fontSize: "18px" }}>Welcome  {userid},</span>
 
-
-        </div>
+                </div>
         <div onClick={handleShow} className='d-flex justify-content-center align-items-center' style={{
           height: `${height * 0.18}px`, margin: "10px", borderRadius: "10px", border: "1px solid", cursor: "pointer"
         }}>
