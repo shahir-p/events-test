@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import logo from "../assets/cabbon-logo.png";
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore"; // For role verification
-import { db } from "../firebaseConfig"; // Import Firestore instance
-import Col from 'react-bootstrap/Col';
-
-import Modal from 'react-bootstrap/Modal';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 import ResetOptionsModal from './ResetOptionsModal';
 
 const Login = ({ height, width }) => {
@@ -20,24 +17,10 @@ const Login = ({ height, width }) => {
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
 
-
   const [showModal, setShowModal] = useState(false);
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
-
-  const [validated, setValidated] = useState(false);
-
-  const handleSubmit = (event) => {
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    setValidated(true);
-  };
-
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -48,19 +31,18 @@ const Login = ({ height, width }) => {
     }
 
     try {
-      // Authenticate using User ID (email format assumed)
-      const email = `${userId}`; // Convert User ID to email for Firebase Auth
+      const email = `${userId}`;
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      // Skip Firestore check if the category is "manager"
       if (category === 'manager') {
+        storeUserData(userCredential.user, category);
         redirectToPage(category);
         return;
       }
 
-      // Fetch user role from Firestore
       const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
       if (userDoc.exists() && userDoc.data().category === category) {
+        storeUserData(userCredential.user, category);
         redirectToPage(category);
       } else {
         showError("Invalid category for the given User ID.");
@@ -80,15 +62,15 @@ const Login = ({ height, width }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Skip Firestore check if the category is "manager"
       if (category === 'manager') {
+        storeUserData(user, category);
         redirectToPage(category);
         return;
       }
 
-      // Fetch user role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists() && userDoc.data().category === category) {
+        storeUserData(user, category);
         redirectToPage(category);
       } else {
         showError("Invalid category for the Google account.");
@@ -98,11 +80,21 @@ const Login = ({ height, width }) => {
     }
   };
 
+  const storeUserData = (user, category) => {
+    const userData = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || '',
+      category,
+    };
+    localStorage.setItem('userData', JSON.stringify(userData));
+  };
+
   const redirectToPage = (category) => {
-    if (category === 'boyscaptain') navigate('/boyscaptain');
-    else if (['agrade', 'bgrade', 'general'].includes(category)) navigate('/boys');
-    else if (['captain', 'vicecaptain'].includes(category)) navigate('/captain');
-    else if (category === 'manager') navigate('/manager');
+    if (category === 'boyscaptain') navigate('/boyscaptain', { replace: true });
+    else if (['agrade', 'bgrade', 'general'].includes(category)) navigate('/boys', { replace: true });
+    else if (['captain', 'vicecaptain'].includes(category)) navigate('/captain', { replace: true });
+    else if (category === 'manager') navigate('/manager', { replace: true });
     else showError("Invalid category selected.");
   };
 
@@ -111,6 +103,15 @@ const Login = ({ height, width }) => {
     errorElement.textContent = message;
     setTimeout(() => { errorElement.textContent = ""; }, 2000);
   };
+  useEffect(() => {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const { category } = JSON.parse(userData);
+      redirectToPage(category); // Replace with your existing redirect function
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div
@@ -164,7 +165,9 @@ const Login = ({ height, width }) => {
               disabled={!category}
             />
           </InputGroup>
-          <div className='w-100 '><span style={{ color: "red", fontSize: "12px", float: "right", marginTop: "-" }} onClick={handleShow}>Action</span></div>
+          <div className='w-100 '>
+            <span style={{ color: "red", fontSize: "12px", float: "right" }} onClick={handleShow}>Reset</span>
+          </div>
           <span>OR</span>
           <InputGroup className="mb-2 mt-2" style={{ width: `${width * 0.7}px` }}>
             <Button
@@ -178,7 +181,7 @@ const Login = ({ height, width }) => {
                 alt="Google Logo"
                 style={{ width: "25px", height: "25px", marginRight: "8px" }}
               />
-              
+              Sign in with Google
             </Button>
           </InputGroup>
           <div>

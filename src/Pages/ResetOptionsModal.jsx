@@ -18,21 +18,7 @@ const ResetOptionsModal = ({ show, handleClose }) => {
     }
   };
 
-  const handleEmailReset = async (event) => {
-    event.preventDefault();
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        await updateEmail(user, email);
-        alert("Email updated successfully!");
-      } else {
-        alert("You need to be signed in to update your email.");
-      }
-    } catch (error) {
-      alert(`Failed to update email: ${error.message}`);
-    }
-  };
-
+  
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -58,13 +44,7 @@ const ResetOptionsModal = ({ show, handleClose }) => {
             >
               Reset Password
             </Button>
-            <Button
-              variant="danger"
-              className="mt-2"
-              onClick={handleEmailReset}
-            >
-              Reset Email
-            </Button>
+          
           </div>
         </Form>
       </Modal.Body>
