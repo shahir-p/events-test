@@ -23,7 +23,6 @@
     "react-device-detect": "^2.2.3",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
-    "react-qr-reader": "^2.2.1",
     "react-router-dom": "^7.3.0"
   },
   "devDependencies": {

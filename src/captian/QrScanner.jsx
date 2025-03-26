@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ScanQrCode } from "lucide-react"; // QR Code Icon
 import { Modal, Button } from "react-bootstrap"; // Modal and Button from Bootstrap
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner } from "html5-qrcode"; // QR code scanner from html5-qrcode
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
 
 const QrScanner = () => {
