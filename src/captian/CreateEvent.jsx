@@ -2,10 +2,17 @@ import { useState } from "react";
 import { Modal, Button, Card } from "react-bootstrap";
 import { PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import CreateEventModal from "./CreateEventModal";
 
 
 
-const CreateEvent = ({ height, width }) => {
+const CreateEvent = ({ height, width },eventId) => {
+  console.log(eventId);
+  
+  const [showModal, setShowModal] = useState(false);
+
+  const handleOpen = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
   const fetchUserId = () => {
     // Retrieve the data from localStorage
     const userData = localStorage.getItem("userData");
@@ -35,12 +42,7 @@ const CreateEvent = ({ height, width }) => {
   } else {
     console.error("User ID not found.");
   }
-  
-  const [show, setShow] = useState(false);
 
-  const handleShow = () => setShow(true)
-  const handleClose = () => setShow(false)
-  
 
   return (
 
@@ -52,7 +54,7 @@ const CreateEvent = ({ height, width }) => {
                     <span style={{ paddingLeft: "10px", fontSize: "18px" }}>Welcome  {userid},</span>
 
                 </div>
-        <div onClick={handleShow} className='d-flex justify-content-center align-items-center' style={{
+        <div  onClick={handleOpen} className='d-flex justify-content-center align-items-center' style={{
           height: `${height * 0.18}px`, margin: "10px", borderRadius: "10px", border: "1px solid", cursor: "pointer"
         }}>
           <div className="d-flex gap-3 justify-content-between align-items-center">
@@ -77,21 +79,7 @@ const CreateEvent = ({ height, width }) => {
 
       </div>
 
-      <Modal show={show} centered>
-        <Modal.Header >
-          <Modal.Title>Create a Event</Modal.Title>
-          <span className="ms-auto text-muted">10-02-2025</span>
-        </Modal.Header>
-        <Modal.Body>
-          <input type="text" className="form-control mb-3 border border-1" placeholder="Place" />
-          <input type="text" className="form-control mb-3 border border-1" placeholder="Time (breakfast/noon/dinner)" />
-          <input type="text" className="form-control mb-3 border border-1" placeholder="Fine time" />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-          <Link to={'/captain/view-auditorium'} className="btn btn-primary" variant="primary">Add</Link>
-        </Modal.Footer>
-      </Modal>
+      <CreateEventModal show={showModal} handleClose={handleClose} />
     </>
   );
 };

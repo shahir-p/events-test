@@ -3,7 +3,7 @@ import { Modal, Button } from "react-bootstrap";
 import { db, auth } from "../firebaseConfig"; // Replace with your Firebase config path
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-
+import QRCode from "qrcode";
 
 const AddStaffModal = ({ show, handleClose, userid }) => {
     const [formData, setFormData] = useState({
@@ -27,28 +27,29 @@ const AddStaffModal = ({ show, handleClose, userid }) => {
             alert("Name, Mobile, Email, and Grade are mandatory!");
             return;
         }
-        const password = mobile.slice(-6)
-        const CareOf = name + userid; // Last 6 digits of mobile
-        const userID = name + userid; // Last 6 digits of mobile
-        console.log(CareOf);
-
-
+        const password = mobile.slice(-6);
+        const userID = `${name}-${userid}`;
+        
         try {
             // Firebase Authentication: Create new user with email and password
             const userCredential = await createUserWithEmailAndPassword(
-                auth, // Firebase auth instance
+                auth,
                 formData.email,
-                password // Last 6 digits of the mobile number
+                password
             );
 
-            const user = userCredential.user; // Newly created user
+            const user = userCredential.user;
+
+            // Generate a unique QR code with the user ID
+            const qrCode = await QRCode.toDataURL(userID);
 
             // Firestore: Add new staff data
             await setDoc(doc(db, "staff", name), {
                 ...formData,
-                CareOf, // Store password
-                userID
+                userID,
+                qrCode, // Store the generated QR code
             });
+
             alert("Staff added successfully!");
             handleClose(); // Close the modal
             setFormData({

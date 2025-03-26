@@ -2,69 +2,123 @@ import React, { useState } from "react";
 import QrIcon from "../assets/scanner.png";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Modal } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
+import { ChevronLeft } from 'lucide-react';
+import { ScanQrCode } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
+import { CirclePlus } from 'lucide-react';
+
+import QrScanner from "./QrScanner";
+
 
 const Auditorium = ({ height, width }) => {
+
+  const location = useLocation();
+  const { date, time, name, place } = location.state || {};
+
+
+
   const [show, setShow] = useState(false);
-  const navigate = useNavigate();
+
   const back = () => {
     navigate(-1);
   };
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
 
+  const navigate = useNavigate()
+
+  // Navigate back to the previous page
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleFilterSelect = (filterOption) => {
+    console.log(`Selected filter: ${filterOption}`);
+    setIsFilterOpen(false); // Close filter dropdown
+  };
+
   return (
     <>
-      <div style={{ marginTop: `${height * 0.1 + 10}px`, width: `${width}` }}>
-        <div
-          className="d-flex p-2 justify-content-between mx-3"
-          style={{ fontSize: "13px" }}
-        >
-          <div className="d-flex gap-3">
-            <i onClick={back} className="fa-solid fa-angle-left fs-3 "></i>
-            <h3 style={{ fontSize: "16px", marginTop: "3px" }}>
-              Auditorium, place
-            </h3>
+      <div className='home d-flex flex-column  ' style={{ width: `${width}px`, marginTop: `${height * 0.1}px`, marginBottom: `${height * 0.1}px`, padding: "10px 20px" }}>
+        <div className='d-flex justify-content-between align-items-center mb-3 mt-2 '>
+          <div className="d-flex ">
+            <ChevronLeft onClick={handleBackClick} />
+            <h5>{name},{place}</h5></div>
+          <span style={{ fontSize: "16px", color: "green" }}>{time}</span>
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center">
+          <input type="text" className='search d-flex justify-content-between align-items-center mb-2 ' style={{ height: `${height * 0.07}px`, width: `${width - 120}px`, border: "1px solid", borderRadius: "10px", fontSize: "15px", padding: "0px 20px" }} >
+
+
+          </input>
+          <QrScanner/>
+          
+
+        </div>
+
+        <div className="d-flex justify-content-between align-items-center mt-2">
+          <span>Count : 10</span>
+          <CirclePlus className=" text-success"/>
+          {/* Filter Icon and Dropdown */}
+          <div className="position-relative">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <SlidersHorizontal />
+            </button>
+
+            {isFilterOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  width: "200px",
+                  top: "35px",
+                  right: 0,
+                  background: "white",
+                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  zIndex: 998,
+                }}
+              >
+                {["Bc1", "bC2"].map((option) => (
+                  <p
+                    key={option}
+                    onClick={() => handleFilterSelect(option)}
+                    style={{
+                      margin: 0,
+                      padding: "5px 0",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {option}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
-          <p style={{ marginTop: "3px" }} className="text-success fw-semibold ">
-            08:30 am
-          </p>
         </div>
 
-        <div className="d-flex justify-content-center align-items-center mt-3">
-          <div
-            className="border border-dark px-5 w-75 ms-3 me-3 rounded d-flex justify-content-center align-items-center"
-            style={{ height: "39px" }}
-          >
-            Search
-          </div>
-          <img className="me-3" width={"50px"} src={QrIcon} alt="QR Scanner" />
+        <hr />
+        <div className='list d-flex justify-content-between align-items-center mb-2 ' style={{ height: `${height * 0.08}px`, width: `${width - 40}px`, border: "1px solid", borderRadius: "10px", fontSize: "15px", padding: "0px 20px" }} >
+            <span>1</span>
+            <span>Name</span>
+            <span style={{color:"grey"}}>C/O</span>
+            <span style={{fontSize:"13px",color:"green"}}>08-30 am</span>
+          
         </div>
 
-        <div className="d-flex justify-content-between align-items-center ms-3 me-3 mt-4">
-          <p className="ms-1">Count : 1</p>
-          <p className="border border-dark px-4 rounded">Filter</p>
-        </div>
 
-        <hr className="border w-100 shadow border-secondary mx-1 mb-3" />
 
-        <p className="ms-3">Boys :</p>
-        <div
-          onClick={handleShow}
-          className="d-flex justify-content-between align-items-center border rounded border border-dark mx-3 mt-4 "
-        >
-          <div className="d-flex gap-5 ms-3 mt-2">
-            <h3>1</h3>
-            <h3>Name</h3>
-          </div>
-          <p className="text-secondary mt-3 me-5">c/o</p>
-        </div>
 
-        <button
-          className="btn btn-success position-fixed d-flex align-items-center rounded-circle"
-          style={{ position: "fixed", bottom: "120px", right: "15px" }}
-        >
-          +
-        </button>
       </div>
 
       <Modal show={show} centered>
