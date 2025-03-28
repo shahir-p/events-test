@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { getFirestore, collection, doc, setDoc, Timestamp } from "firebase/firestore"; // Modular Firebase imports
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+const CreateEventModal = ({ show, handleClose, state }) => {
+  const { userid } = state || {};
+  // console.log(userid);
 
-const CreateEventModal = ({ show, handleClose }) => {
   const [location, setLocation] = useState("");
   const [place, setPlace] = useState("");
   const [time, setTime] = useState("");
@@ -11,18 +14,20 @@ const CreateEventModal = ({ show, handleClose }) => {
   const navigate = useNavigate();
 
   const handleAddEvent = async () => {
-    if (!place || !time || !fineTime  || !location) {
+    if (!place || !time || !fineTime || !location) {
       alert("Please fill in all fields!");
       return;
     }
 
     try {
       const db = getFirestore(); // Initialize Firestore
-      const eventId = `${new Date().toISOString().split('T')[0]}_${place}`; // Generate a unique event ID based on date and place
+      const eventId = `${new Date().toISOString().split('T')[0]}_${location}`; // Generate a unique event ID based on date and place
       const eventRef = doc(collection(db, "events"), eventId);
 
       // Add data to the `events` collection
       await setDoc(eventRef, {
+        creatorid: userid,
+        eventstatus: true,
         name: location, // Replace this with the actual event name if available
         place: place,
         time: time,
@@ -30,6 +35,29 @@ const CreateEventModal = ({ show, handleClose }) => {
         timestamp: Timestamp.now(),
         boysList: [], // Initialize the boysList array as empty
       });
+
+      const eventData = {
+        creatorid: userid,
+        eventstatus: true,
+        name: location, // Replace this with the actual event name if available
+        place: place,
+        time: time,
+        fineTime: fineTime,
+        timestamp: Timestamp.now(),
+        boysList: [], // Initialize the boysList array as empty
+        eventid:eventId,
+      };
+      
+      // Exclude the `boysList` property
+      const { boysList, ...dataToStore } = eventData; // Destructure to exclude `boysList`
+      
+      // Store the filtered data in localStorage
+      localStorage.setItem("eventData", JSON.stringify(dataToStore));
+      
+      // Retrieve and parse the data when needed
+      const storedEventData = JSON.parse(localStorage.getItem("eventData"));
+      console.log(storedEventData);
+      
 
       alert("Event created successfully!");
       navigate("/captain/view-auditorium", { state: { eventId } }); // Redirect to the specified route with eventId as state

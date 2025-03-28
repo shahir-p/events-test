@@ -25,6 +25,7 @@ const QrScannerComponent = ({ onScanComplete }) => {
           setShowResult(rowValue);
           setResultColor("green");
           return [...prevData, { value: rowValue, time: scanTime }];
+       
         });
       }
     }

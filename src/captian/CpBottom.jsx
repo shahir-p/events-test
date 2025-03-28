@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const CpBottom = ({ height, width }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // Get the current location to highlight the active tab
+  const location = useLocation();
 
-  const tabs = [
-    { id: 'boyshome', label: 'Home', icon: 'fa-solid fa-house', route: '/captain' },
-    { id: 'boysservice', label: 'Service', icon: 'fa-solid fa-bell-concierge', route: '/captain/service' },
-    { id: 'boyspayment', label: 'Payment', icon: 'fa-solid fa-credit-card', route: '/captain/payment' },
-  ];
+  // Check if `eventData` exists in localStorage
+  const eventDataExists = localStorage.getItem("eventData") !== null;
 
-  // Highlight the tab based on the current route
+  // Define tabs dynamically based on `eventData` existence
+  const tabs = eventDataExists
+    ? [
+        { id: 'auditorium', label: 'Home', icon: 'fa-solid fa-house', route: '/captain/view-auditorium' },
+        { id: 'boysservice', label: 'Service', icon: 'fa-solid fa-bell-concierge', route: '/captain/service' },
+        { id: 'boyspayment', label: 'Payment', icon: 'fa-solid fa-credit-card', route: '/captain/payment' },
+      ]
+    : [
+        { id: 'boyshome', label: 'Home', icon: 'fa-solid fa-house', route: '/captain' },
+        { id: 'boysservice', label: 'Service', icon: 'fa-solid fa-bell-concierge', route: '/captain/service' },
+        { id: 'boyspayment', label: 'Payment', icon: 'fa-solid fa-credit-card', route: '/captain/payment' },
+      ];
+
+  // Highlight the active tab based on the current route
   const getActiveTab = () => {
     const currentRoute = location.pathname;
     const activeTab = tabs.find((tab) => currentRoute.startsWith(tab.route));
-    return activeTab ? activeTab.id : 'boyshome'; // Default to 'boyshome' if no match
+    return activeTab ? activeTab.id : tabs[0].id; // Default to the first tab if no match
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTab());
+
+  useEffect(() => {
+    // Update active tab when the location changes
+    setActiveTab(getActiveTab());
+  }, [location, tabs]);
 
   const handleTabClick = (tabId, route) => {
     setActiveTab(tabId); // Update active tab state

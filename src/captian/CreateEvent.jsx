@@ -6,8 +6,8 @@ import CreateEventModal from "./CreateEventModal";
 
 
 
-const CreateEvent = ({ height, width },eventId) => {
-  console.log(eventId);
+const CreateEvent = ({ height, width }) => {
+
   
   const [showModal, setShowModal] = useState(false);
 
@@ -79,7 +79,7 @@ const CreateEvent = ({ height, width },eventId) => {
 
       </div>
 
-      <CreateEventModal show={showModal} handleClose={handleClose} />
+      <CreateEventModal show={showModal} handleClose={handleClose} state={{ userid }} />
     </>
   );
 };
