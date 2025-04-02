@@ -131,7 +131,7 @@ const Auditorium = ({ height, width }) => {
       );
 
       if (!isDuplicate) {
-        const newRecords = [...prevRecords, record];
+        const newRecords = [record, ...prevRecords]; // Prepend the new record
         localStorage.setItem("fetchedRecords", JSON.stringify(newRecords));
         return newRecords;
       } else {
@@ -148,18 +148,29 @@ const Auditorium = ({ height, width }) => {
   const handleScanComplete = (data) => {
     if (data && data.length > 0) {
       setFetchedRecords((prevRecords) => {
-        const newRecords = data.filter(
-          (record) =>
-            !prevRecords.some(
-              (existingRecord) => existingRecord.id === record.id
-            )
-        );
-        const updatedRecords = [...prevRecords, ...newRecords];
+        const newRecords = data
+          .filter(
+            (record) =>
+              !prevRecords.some(
+                (existingRecord) => existingRecord.userID === record.userID
+              )
+          )
+          .map((record) => ({
+            ...record,
+            careof: record.userID?.split("-")[1] || "N/A", // Extract 'careof' or default to 'N/A'
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }));
+
+        const updatedRecords = [...newRecords, ...prevRecords]; // Prepend the new records
         localStorage.setItem("fetchedRecords", JSON.stringify(updatedRecords));
         return updatedRecords;
       });
     }
   };
+
 
   const handleSave = async () => {
     const db = getFirestore();
@@ -184,6 +195,29 @@ const Auditorium = ({ height, width }) => {
     } catch (error) {
       console.error("Error saving records:", error);
     }
+  };
+
+  //for list boys modal
+
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleShowModal = (record) => {
+    setSelectedRecord(record);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleRemoveUser = () => {
+    setFetchedRecords((prevRecords) =>
+      prevRecords.filter((record) => record.userID !== selectedRecord.userID)
+    );
+    setShowConfirmModal(false);
+    setShowModal(false);
   };
 
   useEffect(() => {
@@ -294,7 +328,9 @@ const Auditorium = ({ height, width }) => {
                 borderRadius: "10px",
                 fontSize: "15px",
                 padding: "0px 20px",
+                cursor: "pointer",
               }}
+              onClick={() => handleShowModal(record)}
             >
               <span>{index + 1}</span>
               <span>{record.name}</span>
@@ -306,6 +342,62 @@ const Auditorium = ({ height, width }) => {
           ))
         ) : (
           <p>No boys.</p>
+        )}
+
+        {/* Boy Details Modal */}
+        {selectedRecord && (
+          <Modal show={showModal} onHide={handleCloseModal}>
+            <Modal.Header closeButton>
+              <Modal.Title>Show Boy</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                <strong>Name:</strong> {selectedRecord.name}
+              </p>
+              <p>
+                <strong>C/O:</strong> {selectedRecord.careof}
+              </p>
+              <p>
+                <strong>Entry Time:</strong> {selectedRecord.time}
+              </p>
+              <p className="d-flex justify-content-between align-items-center">
+                <strong>Fine:</strong>
+                <select className="form-select w-auto">
+                  <option value="Late">Late</option>
+                  <option value="Costume">Costume</option>
+                  <option value="Emergency">Emergency</option>
+                  <option value="Warning">Warning</option>
+                </select>
+              </p>
+              <Button
+                variant="danger"
+                className="mt-3"
+                onClick={() => setShowConfirmModal(true)}
+              >
+                Remove User
+              </Button>
+            </Modal.Body>
+          </Modal>
+        )}
+
+        {/* Confirm Delete Modal */}
+        {selectedRecord && (
+          <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Delete</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to remove {selectedRecord.name}?
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleRemoveUser}>
+                Remove
+              </Button>
+            </Modal.Footer>
+          </Modal>
         )}
       </div>
       <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>

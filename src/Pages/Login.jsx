@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
-import logo from "../assets/cabbon-logo.png";
+// import logo from "../assets/cabbon-logo.png";
 import { useNavigate } from "react-router-dom";
 import {
   getAuth,
@@ -166,12 +166,12 @@ const Login = ({ height, width }) => {
     >
       <img
         className="logo"
-        src={logo}
+        src="https://i.postimg.cc/sX3SbYbK/Eventz.png"
         alt="Logo"
         style={{ width: `100px`, height: `100px` }}
       />
       <h3 className="mb-5" style={{ fontFamily: "Joan, serif" }}>
-        CABBON
+       EventZz
       </h3>
       <Form onSubmit={handleLogin}>
         <div className="border border-secondary rounded p-3 d-flex flex-column justify-content-center align-items-center">

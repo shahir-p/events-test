@@ -18,7 +18,7 @@ const Mgpaymentdetails = ({ height, width }) => {
     };
     return (
         <>
-            <div className='' style={{ width: `${width}`, marginTop: `${height * 0.1}px`, marginBottom: `${height * 1}px`, padding: "10px 20px", marginBottom: `${height * 0.1}px`, }}>
+            <div className='' style={{ width: `${width}`, marginTop: `${height * 0.1}px`, padding: "10px 20px", marginBottom: `${height * 0.1}px`, }}>
                 <div className='d-flex mb-3 mt-2'>
                     <ChevronLeft onClick={handleBackClick} />
                     <h5>Payment Details</h5></div>

@@ -70,7 +70,7 @@ const MgAppbar = ({ height, width }) => {
             >
                 <div className='d-flex justify-content-between align-items-center'>
                     <img
-                        src={logo} // Use the imported image here
+                        src="https://i.postimg.cc/sX3SbYbK/Eventz.png" // Use the imported image here
                         alt=""
                         style={{ height: "50px", paddingLeft: "10px" }} // Add height or width for proper scaling
                     />
@@ -78,7 +78,7 @@ const MgAppbar = ({ height, width }) => {
                         className="title"
                         style={{ paddingLeft: "0px", fontSize: "20px", fontWeight: "500" }}
                     >
-                        Cabbon
+                        EventZz
                     </span>
                 </div>
                 <div className="appbarIcons d-flex column-gap-3 me-3">

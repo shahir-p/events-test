@@ -1,14 +1,14 @@
 {
-    "short_name": "Cabbon",
-    "name": "Cabbon",
+    "short_name": "Eventz",
+    "name": "Eventz",
     "icons": [
       {
-        "src": "./src/assets/cabbon-logo.png",
+        "src": "https://i.postimg.cc/sX3SbYbK/Eventz.png",
         "type": "image/png",
         "sizes": "192x192"
       },
       {
-        "src": "./src/assets/cabbon-logo.png",
+        "src": "https://i.postimg.cc/sX3SbYbK/Eventz.png",
         "type": "image/png",
         "sizes": "512x512"
       }
